@@ -1,0 +1,7 @@
+*.swp
+*.xml
+*.atom
+__pycache__/
+.mypy_cache/
+venv/
+blog.py
