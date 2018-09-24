@@ -1,5 +1,4 @@
 import datetime
-import html
 from typing import Union, List
 import requests
 from feedgen.feed import FeedGenerator
@@ -61,10 +60,10 @@ class Article:
     def content(self) -> str:
         content = []
         initial_p = self._soup.body.article.find("p")
-        content.append(html.escape(str(initial_p), quote=True))
+        content.append(str(initial_p))
         for tag in initial_p.next_siblings:
             if isinstance(tag, Tag):
-                content.append(html.escape(str(tag), quote=True))
+                content.append(str(tag))
         return "\n".join(content)
 
 class Feed:
@@ -100,7 +99,7 @@ class Feed:
         feed_entry.guid(guid=article.url, permalink=True)
         feed_entry.author(name=self.name, email=self.email)
         feed_entry.summary(article.description or article.snippet)
-        feed_entry.content(content=article.content, type="html")
+        feed_entry.content(content=article.content, type="CDATA")
         feed_entry.published(article.date)
         if article.date:
             feed_entry.published(article.date)
