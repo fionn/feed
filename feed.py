@@ -62,7 +62,7 @@ class Article:
         initial_p = self._soup.body.article.find("p")
         content.append(str(initial_p))
         for tag in initial_p.next_siblings:
-            if isinstance(tag, Tag):
+            if isinstance(tag, Tag) and tag.name not in {"link", "script"}:
                 content.append(str(tag))
         return "\n".join(content)
 
