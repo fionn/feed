@@ -1,5 +1,6 @@
 import datetime
 from typing import Union, List
+import textwrap
 import requests
 from feedgen.feed import FeedGenerator
 from bs4 import BeautifulSoup, Tag
@@ -28,6 +29,8 @@ class Blog:
 
 class Article:
 
+    JOINERY = "\n" + " " * 6
+
     def __init__(self, title: str, url: str) -> None:
         self.url = url
         self.title = title
@@ -41,10 +44,19 @@ class Article:
         response.raise_for_status()
         return response.content
 
+    @staticmethod
+    def _content_wrapper(tag: Tag) -> str:
+        if tag.name in {"pre", "code"}:
+            return str(tag)
+        lines = [Article.JOINERY.join(textwrap.wrap(line, width=80))
+                 for line in str(tag).splitlines()]
+        return Article.JOINERY.join(lines)
+
     @property
     def date(self) -> Union[datetime.datetime, None]:
         try:
-            date = datetime.datetime.fromisoformat(self._soup.time.get("datetime"))
+            soup_time = self._soup.time.get("datetime")
+            date = datetime.datetime.fromisoformat(soup_time)
             return date.replace(tzinfo=datetime.timezone.utc)
         except AttributeError:
             return None
@@ -60,11 +72,12 @@ class Article:
     def content(self) -> str:
         content = []
         initial_p = self._soup.body.article.find("p")
-        content.append(str(initial_p))
+        content.append(self._content_wrapper(initial_p))
         for tag in initial_p.next_siblings:
-            if isinstance(tag, Tag) and tag.name not in {"link", "script"}:
-                content.append(str(tag))
-        return "\n".join(content)
+            if isinstance(tag, Tag) \
+               and tag.name not in {"link", "script", "object"}:
+                content.append(self._content_wrapper(tag))
+        return self.JOINERY.join(content)
 
 class Feed:
 
