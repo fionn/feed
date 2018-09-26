@@ -46,9 +46,11 @@ class Article:
 
     @staticmethod
     def _content_wrapper(tag: Tag) -> str:
+        wrapper = textwrap.TextWrapper(width=80, break_long_words=False,
+                                       break_on_hyphens=False)
         if tag.name in {"pre", "code"}:
             return str(tag)
-        lines = [Article.JOINERY.join(textwrap.wrap(line, width=80))
+        lines = [Article.JOINERY.join(wrapper.wrap(line))
                  for line in str(tag).splitlines()]
         return Article.JOINERY.join(lines)
 
