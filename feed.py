@@ -58,10 +58,10 @@ class Article:
     def date(self) -> Union[datetime.datetime, None]:
         try:
             soup_time = self._soup.time.get("datetime")
-            date = datetime.datetime.fromisoformat(soup_time)
-            return date.replace(tzinfo=datetime.timezone.utc)
         except AttributeError:
             return None
+        date = datetime.datetime.fromisoformat(soup_time)
+        return date.replace(tzinfo=datetime.timezone.utc)
 
     @property
     def description(self) -> Union[None, str]:
@@ -79,7 +79,7 @@ class Article:
             if isinstance(tag, Tag) \
                and tag.name not in {"link", "script", "object"}:
                 content.append(self._content_wrapper(tag))
-        return self.JOINERY.join(content)
+        return self.JOINERY.join(content) + self.JOINERY
 
 class Feed:
 
@@ -131,10 +131,10 @@ class Feed:
         for article in blog.articles:
             self.add(article)
 
-    def atom(self) -> str:
+    def atom(self) -> bytes:
         return self.fg.atom_str(pretty=True)
 
-    def rss(self) -> str:
+    def rss(self) -> bytes:
         return self.fg.rss_str(pretty=True)
 
     def atom_file(self, filename: str = "feed.atom") -> None:
